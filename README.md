@@ -37,7 +37,8 @@ file. The packing attributes from the remaining files must match exactly those i
 first file or data from subsequent files will not unpack correctly. Be sure all input
 files share the same packing attributes. If in doubt, unpack (with ncpdq -U) the input
 files, then concatenate them, then pack the result (with ncpdq). This message is printed
-only once per invocation.```
+only once per invocation.
+```
 
 produces a file `output.nc` containing incorrect data for `alnid` and possibly
 other variables.
