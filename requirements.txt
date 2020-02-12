@@ -1,0 +1,11 @@
+cdsapi==0.2.5
+certifi==2019.11.28
+cftime==1.0.4.2
+chardet==3.0.4
+idna==2.8
+netCDF4==1.5.3
+numpy==1.18.1
+requests==2.22.0
+scipy==1.4.1
+tqdm==4.42.1
+urllib3==1.25.8

@@ -38,7 +38,7 @@ def remap(args):
         raise EnvironmentError("you must have {} installed.".format(cdo))
     with TemporaryDirectory() as directory:
         weights = join(directory, "remap-weights.nc")
-        run(["cdo", "gencon,r{}x{}".format(args.nlon, args.nlat), args.dataset, weights],
+        run([cdo, "gencon,r{}x{}".format(args.nlon, args.nlat), args.dataset, weights],
             check=True)
-        run(["cdo", "-f", "nc4", "remap,r{}x{},{}".format(args.nlon, args.nlat, weights),
+        run([cdo, "-f", "nc4", "remap,r{}x{},{}".format(args.nlon, args.nlat, weights),
             args.dataset, args.output], check=True)
