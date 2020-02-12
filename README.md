@@ -16,7 +16,7 @@ Whether or not this occurs for a specific grid point can be determined
 by comparing the pressure levels to the surface pressure at that point.
 Surface pressure can be downloaded from the "single level" data product.
 
-###### Scale and offset factors for a variable may vary between files
+##### Scale and offset factors for a variable may vary between files
 Many of the ERA5 variables in the netCDF files are provided as short
 integers, which may be converted to floating-point using the included
 `scale_factor` and `add_offset` attributes.  For any variable, these
