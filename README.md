@@ -21,7 +21,7 @@ Many of the ERA5 variables in the netCDF files are provided as short
 integers, which may be converted to floating-point using the included
 `scale_factor` and `add_offset` attributes.  For any variable, these
 `scale_factor` and `add_offset` attributes are not guaranteed to be
-the same in two different files.  If the two or more files are combined
+the same in two different files.  If two or more files are combined
 without first "unpacking" the data, differences in these `scale_factor`
 and `add_offset` variables can introduce artificial noise into the data.
 The common combining tool `ncrcat` does print a warning if it detects
