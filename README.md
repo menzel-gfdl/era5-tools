@@ -29,9 +29,9 @@ differences in the `scale_factor` and `add_offset` attributes for a variable
 between files, but continues to run and produces erroneous data.  For example,
 running:
 
-```$ ncrcat file1.nc file2.nc output.nc```
-
-```ncrcat: INFO/WARNING Multi-file concatenator encountered packing attribute add_offset
+```
+$ ncrcat file1.nc file2.nc output.nc
+ncrcat: INFO/WARNING Multi-file concatenator encountered packing attribute add_offset
 for variable alnid. NCO copies the packing attributes from the first file to the output
 file. The packing attributes from the remaining files must match exactly those in the
 first file or data from subsequent files will not unpack correctly. Be sure all input
