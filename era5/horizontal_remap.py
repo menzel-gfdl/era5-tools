@@ -21,14 +21,26 @@ class HorizontalRemap(Command):
         parser.add_argument("output", help="Output file path.")
         parser.add_argument("nlon", help="Number of longitude points.", type=int)
         parser.add_argument("nlat", help="Number of latitude points.", type=int)
-        parser.set_defaults(func=remap)
+        parser.set_defaults(func=remap_)
 
 
-def remap(args):
+def remap_(args):
     """Perform horizontal remapping on an entire dataset using cdo.
 
     Args:
         args: Namespace object returned by ArgumentParser().parse_args().
+    """
+    remap(args.dataset, args.output, args.nlon, args.nlat)
+
+
+def remap(dataset, output, nlon, nlat):
+    """Perform horizontal remapping on an entire dataset using cdo.
+
+    Args:
+        dataset: Path to netCDF4 dataset that will be remapped.
+        output: Path to output netCDF4 dataset.
+        nlon: Number of longitude points to remap to.
+        nlat: Number of latitude points to remap to.
 
     Raises:
         EnvironmentError if cdo is not found.
@@ -38,7 +50,5 @@ def remap(args):
         raise EnvironmentError("you must have {} installed.".format(cdo))
     with TemporaryDirectory() as directory:
         weights = join(directory, "remap-weights.nc")
-        run([cdo, "gencon,r{}x{}".format(args.nlon, args.nlat), args.dataset, weights],
-            check=True)
-        run([cdo, "-f", "nc4", "remap,r{}x{},{}".format(args.nlon, args.nlat, weights),
-            args.dataset, args.output], check=True)
+        run([cdo, "gencon,r{}x{}".format(nlon, nlat), dataset, weights], check=True)
+        run([cdo, "-f", "nc4", "remap,r{}x{},{}".format(nlon, nlat, weights), dataset, output], check=True)

@@ -21,16 +21,20 @@ class VerticalRemap(Command):
         parser.add_argument("level_file", help="File path for pressure level data.")
         parser.add_argument("single_file", help="File path for single level data.")
         parser.add_argument("output", help="Output file path.")
-        parser.set_defaults(func=remap)
+        parser.set_defaults(func=remap_)
 
 
-def remap(args):
+def remap_(args):
     """Perform vertical remapping on an entire dataset using ERA interim a and b parameters.
 
     Args:
         args: Namespace object returned by ArgumentParser().parse_args().
     """
-    era_interim_remapper.remap_all(args.level_file, args.single_file, args.output,
+    remap(args.level_file, args.single_file, args.output),
+
+
+def remap(level_file, single_file, output):
+    era_interim_remapper.remap_all(level_file, single_file, output,
                                    "sp", {"t" : "t2m"}, basic_converter)
 
 
@@ -41,12 +45,14 @@ class VerticalRemapper(object):
         a: Pressure parameters.
         b: Surface pressure coefficients.
         units: Units of the self.a pressure parameters.
+        level_map: Map from pressure levels to a and b parameters.
     """
 
-    def __init__(self, a, b, units):
+    def __init__(self, a, b, units, level_map):
         self.a = copy(a)
         self.b = copy(b)
         self.units = units
+        self.level_map = level_map
 
     def pressure(self, surface_pressure, units, converter):
         """Calculates the pressures that the column will be remapped to.
@@ -56,7 +62,14 @@ class VerticalRemapper(object):
             units: Surface pressure units.
             converter: UnitsConverter object.
         """
-        return self.a*converter.convert(self.units, units) + self.b*surface_pressure
+        conversion = converter.convert(self.units, units)
+        pressure = zeros(len(self.level_map))
+        for i, level in enumerate(self.level_map):
+            phalf_lower = self.a[level]*conversion + self.b[level]*surface_pressure
+            phalf_upper = self.a[level+1]*conversion + self.b[level+1]*surface_pressure
+            pressure[i] = 0.5*(phalf_lower + phalf_upper)
+        return pressure
+
 
     def remap_column(self, variable, pressure, surface_pressure, pressure_units, converter,
                      fill_value=0):
@@ -112,8 +125,9 @@ class VerticalRemapper(object):
                 names = [x.name for x in variable.parent.get_dims()]
                 names[variable.pressure_index] = coordinate
                 if not added_p:
-                    sigma = new_dataset.create_coordinate(coordinate, self.a.size, int)
-                    sigma[:] = linspace(1, self.a.size, num=self.a.size)[:]
+                    sigma = new_dataset.create_coordinate(coordinate, len(self.level_map), int)
+                    sigma.setncattr("positive", "down")
+                    sigma[:] = linspace(1, len(self.level_map), num=len(self.level_map))[:]
                     remapped_p_name = "p"
                     attrs = {"units" : variable.pressure_units,
                              "standard_name" : "air_pressure"}
@@ -183,13 +197,39 @@ class VerticalRemapper(object):
                                            variable.pressure_index)[...]
 
 
-a_era_interim = asarray([0.96, 1.81, 2.35, 4.65, 5.76, 8.84, 16.81, 25.80, 49.07, 60.18, 87.65,
-                         103.76, 137.75, 153.80, 168.19, 180.45, 190.28, 197.55, 204.30, 203.84,
-                         195.84, 188.65, 179.61, 157.06, 144.11, 130.43, 116.33, 102.10,
-                         88.02, 74.38, 61.44, 49.42, 38.51, 28.88, 20.64, 8.55, 2.10])
-b_era_interim = asarray([0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.00008, 0.00046,
-                         0.00508, 0.01114, 0.02068, 0.03412,
-                         0.05169, 0.07353, 0.13002, 0.16438, 0.24393, 0.28832, 0.33515, 0.43396,
-                         0.48477, 0.53571, 0.58617, 0.63555, 0.68327, 0.72879, 0.77160, 0.81125,
-                         0.84737, 0.87966, 0.90788, 0.95182, 0.97966])
-era_interim_remapper = VerticalRemapper(a_era_interim, b_era_interim, units="hPa")
+a_era_interim = asarray([0.00, 0.20, 0.38, 0.64, 0.96,
+                         1.34, 1.81, 2.35, 2.98, 3.74,
+                         4.65, 5.76, 7.13, 8.84, 10.95,
+                         13.56, 16.81, 20.82, 25.80, 31.96,
+                         39.60, 49.07, 60.18, 73.07, 87.65,
+                         103.76, 120.77, 137.75, 153.80, 168.19,
+                         180.45, 190.28, 197.55, 202.22, 204.30,
+                         203.84, 200.97, 195.84, 188.65, 179.61,
+                         168.99, 157.06, 144.11, 130.43, 116.33,
+                         102.10, 88.02, 74.38, 61.44, 49.42,
+                         38.51, 28.88, 20.64, 13.86, 8.55,
+                         4.67, 2.10, 0.66, 0.07, 0.00,
+                         0.00])
+b_era_interim = asarray([0.00000, 0.00000, 0.00000, 0.00000, 0.00000,
+                         0.00000, 0.00000, 0.00000, 0.00000, 0.00000,
+                         0.00000, 0.00000, 0.00000, 0.00000, 0.00000,
+                         0.00000, 0.00000, 0.00000, 0.00000, 0.00000,
+                         0.00000, 0.00000, 0.00000, 0.00000, 0.00008,
+                         0.00046, 0.00182, 0.00508, 0.01114, 0.02068,
+                         0.03412, 0.05169, 0.07353, 0.09967, 0.13002,
+                         0.16438, 0.20248, 0.24393, 0.28832, 0.33515,
+                         0.38389, 0.43396, 0.48477, 0.53571, 0.58617,
+                         0.63555, 0.68327, 0.72879, 0.77160, 0.81125,
+                         0.84737, 0.87966, 0.90788, 0.93194, 0.95182,
+                         0.96765, 0.97966, 0.98827, 0.99402, 0.99763,
+                         1.00000])
+level_map_era_interim = (5, 7, 8, 11, 12,
+                         14, 17, 19, 22, 23,
+                         25, 26, 28, 29, 30,
+                         31, 32, 33, 35, 36,
+                         38, 39, 40, 42, 43,
+                         44, 45, 46, 47, 48,
+                         49, 50, 51, 52, 53,
+                         55, 57)
+era_interim_remapper = VerticalRemapper(a_era_interim, b_era_interim, "hPa",
+                                        level_map_era_interim)

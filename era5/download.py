@@ -27,21 +27,21 @@ class Download(Command):
         parser.add_argument("-D", help="Ending day.", type=int)
         parser.add_argument("-t", help="Starting hour.", type=int)
         parser.add_argument("-T", help="Ending hour.", type=int)
-        parser.set_defaults(func=download)
+        parser.set_defaults(func=download_)
 
 
-def download(args):
+def download_(args):
     """Downloads ERA5 clear-sky radiation-related data.
 
     Args:
         args: Namespace object returned by ArgumentParser().parse_args().
     """
-    clear_sky_radiation(args.level_file, args.single_file, args.timescale,
-                        args.y, args.Y, args.m, args.M, args.d, args.D, args.t, args.T)
+    download(args.level_file, args.single_file, args.timescale,
+             args.y, args.Y, args.m, args.M, args.d, args.D, args.t, args.T)
 
 
-def clear_sky_radiation(level_output, single_output, timescale, y, Y, m, M, d=None,
-                        D=None, t=None, T=None):
+def download(level_output, single_output, timescale, y, Y, m, M, d=None,
+             D=None, t=None, T=None):
     """Download data from the Copernicus Data Store (CDS).  This requires an
        account, and associated credientials in a file $HOME/.cdsapirc.
 

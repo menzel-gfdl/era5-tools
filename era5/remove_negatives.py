@@ -16,18 +16,27 @@ class RemoveNegatives(Command):
         command = "remove-negatives"
         parser = subparsers.add_parser(command, help="{} help.".format(command))
         parser.add_argument("dataset", help="Dataset to be modified.")
-        parser.set_defaults(func=remove_negatives)
+        parser.set_defaults(func=remove_negatives_)
 
 
-def remove_negatives(args):
+def remove_negatives_(args):
     """Replaces negative values with a small positive value.
 
     Args:
         args: Namespace object returned by ArgumentParser().parse_args().
     """
+    remove_negatives(args.dataset)
+
+
+def remove_negatives(path):
+    """Replaces negative values with a small positive value.
+
+    Args:
+        path: Path to netCDF dataset that will be modified.
+    """
     blacklist = ["msdwlwrfcs", "msdwswrfcs", "msnlwrfcs", "msnswrfcs",
                  "mtdwswrf", "mtnlwrfcs", "mtnswrfcs"]
-    with Dataset(args.dataset, "a") as dataset:
+    with Dataset(path, "a") as dataset:
         blacklist += [x for x in dataset.dimensions.keys()]
         for name, v in dataset.variables.items():
             if name in blacklist:
