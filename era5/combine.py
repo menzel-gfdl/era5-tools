@@ -23,10 +23,10 @@ class Combine(Command):
         parser = subparsers.add_parser(command, help="{} help.".format(command))
         parser.add_argument("datasets", nargs="+", help="input datasets.")
         parser.add_argument("output", help="output file path.")
-        parser.set_defaults(func=combine)
+        parser.set_defaults(func=combine_)
 
 
-def combine(args):
+def combine_(args):
     """Concatenates netCDF datasets together.
 
     Args:
@@ -35,9 +35,21 @@ def combine(args):
     Raises:
         EnvironmentError if ncrcat and/or ncpdq are/is not found.
     """
+    combine(args.datasets, args.output)
+
+def combine(datasets, output):
+    """Concatenates netCDF datasets together.
+
+    Args:
+        datasets: List of paths to input files.
+        output: Path to output file.
+
+    Raises:
+        EnvironmentError if ncrcat and/or ncpdq are/is not found.
+    """
     if which(ncrcat) is None or which(ncpdq) is None:
         raise EnvironmentError("you must have {} and {} installed.".format(ncrcat, ncpdq))
-    cat(sorted(args.datasets), args.output)
+    cat(sorted(datasets), output)
 
 
 def unpack(datasets, directory):
