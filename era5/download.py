@@ -74,7 +74,9 @@ def download(level_output, single_output, timescale, y, Y, m, M, d=None,
         times = None
 
     #Level variables.
-    variables = ("ozone_mass_mixing_ratio", "specific_humidity", "temperature")
+    variables = ("ozone_mass_mixing_ratio", "specific_humidity", "temperature",
+                 "fraction_of_cloud_cover", "specific_cloud_ice_water_content",
+                 "specific_cloud_liquid_water_content")
     pressure_levels = (1, 2, 3, 5, 7, 10, 20, 30, 50, 70, 100, 125, 150, 175, 200,
                        225, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750,
                        775, 800, 825, 850, 875, 900, 925, 950, 975, 1000)
@@ -96,7 +98,15 @@ def download(level_output, single_output, timescale, y, Y, m, M, d=None,
                  "mean_surface_net_short_wave_radiation_flux_clear_sky",
                  "mean_top_downward_short_wave_radiation_flux",
                  "mean_top_net_long_wave_radiation_flux_clear_sky",
-                 "mean_top_net_short_wave_radiation_flux_clear_sky")
+                 "mean_top_net_short_wave_radiation_flux_clear_sky"
+                 "mean_surface_downward_long_wave_radiation_flux",
+                 "mean_surface_downward_short_wave_radiation_flux",
+                 "mean_surface_downward_uv_radiation_flux",
+                 "mean_surface_net_long_wave_radiation_flux",
+                 "mean_surface_net_short_wave_radiation_flux",
+                 "mean_top_downward_short_wave_radiation_flux",
+                 "mean_top_net_long_wave_radiation_flux",
+                 "mean_top_net_short_wave_radiation_flux")
     retrieve(client, products[timescale].single_name, products[timescale].type, single_output,
              variables, years, months, days=days, times=times)
 
