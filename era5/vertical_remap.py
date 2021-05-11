@@ -163,13 +163,13 @@ class VerticalRemapper(object):
 
                 #Reshape data.  Make the variable 2d, with pressure as the fastest dimension.
                 rs = moveaxis(variable.parent[...], variable.pressure_index, -1)
-                new_shape = rs.shape
+                new_shape = tuple(rs.shape[:-1] + (len(self.level_map),))
                 x = reshape(rs, (variable.parent.size//variable.pressure.size,
                                  variable.pressure.size))
-                y = zeros(x.shape)
+                y = zeros((x.shape[0], len(self.level_map)))
                 if sv is not None:
                     x_surface = ravel(sv[...])
-                z = zeros(x.shape)
+                z = zeros((x.shape[0], len(self.level_map)))
 
                 #Find the indices where the data in the file is underground.
                 sp = surface_data.variables[surface_pressure]
@@ -181,6 +181,7 @@ class VerticalRemapper(object):
                 #Loop through each column and interpolate, adding in the surface values and
                 #ignoring points undergound.
                 for i in range(x.shape[0]):
+                    if i >= indices.size: break
                     if sv is None:
                         xs = x[i,indices[i]-1]
                     else:
@@ -189,8 +190,9 @@ class VerticalRemapper(object):
                     p = append(copy(variable.pressure[:indices[i]]), sp1d[i])
                     z[i,:], y[i,:] = self.remap_column(column, p, sp1d[i],
                                                        variable.pressure_units, converter,
-                                                       fill_value=column[0])
+                                                       fill_value=(column[0], column[-1]))
                 if remapped_p is not None:
+                    print(remapped_p.shape, new_shape, z.shape)
                     remapped_p[...] = moveaxis(reshape(z, new_shape), -1,
                                                variable.pressure_index)[...]
                 remapped_v[...] = moveaxis(reshape(y, new_shape), -1,
